@@ -16,10 +16,10 @@ use App\Http\Controllers\API\AuthController;
 |
 */
 Route::post('/signup', [AuthController::class, 'signup']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::middleware('auth:api')->group(function () {
-    Route::put('/profile', [AuthController::class, 'updateProfile']);
-    Route::get('/profile', [AuthController::class, 'getUserProfile']);
+    Route::post('/update-user', [AuthController::class, 'updateProfile']);
+    Route::get('/get-user', [AuthController::class, 'getProfile']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

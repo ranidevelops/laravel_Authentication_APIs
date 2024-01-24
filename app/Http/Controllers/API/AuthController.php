@@ -64,5 +64,57 @@ class AuthController extends Controller
     return response()->json(['token' => $token], 200);
 }
 
+    public function getProfile()
+    {
+    $user = auth()->user();
+    return response()->json(['user' => $user], 200);
+    }
+
+    public function updateProfile(Request $request)
+{
+    // Validation logic here
+    $validator = Validator::make($request->all(), [
+        'name' => 'string|max:255',
+        'email' => 'email|unique:users,email,' . auth()->user()->email,
+        'password' => 'string|min:8',
+        'date_of_birth' => 'date_format:d-m-Y',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['error' => $validator->errors()], 422);
+    }
+
+    // Update profile logic
+    $user = auth()->user();
+
+    if ($request->filled('email')) {
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser && $existingUser->email !== $user->email) {
+            return response()->json(['error' => 'The email has already been taken.'], 422);
+        }
+
+        $user->email = $request->email;
+    }
+
+    $user->fill($request->all());
+
+    if ($request->filled('password')) {
+        $user->password = bcrypt($request->password);
+    }
+
+    if ($request->filled('date_of_birth')) {
+        $user->date_of_birth = Carbon::createFromFormat('d-m-Y', $request->date_of_birth)->format('Y-m-d');
+    }
+
+    $user->save();
+
+    // Return the updated user profile
+    return response()->json(['message' => 'Profile updated successfully', 'user' => $user], 200);
+}
+
+
+
+
 
 }
