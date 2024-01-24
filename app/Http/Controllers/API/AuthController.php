@@ -14,7 +14,7 @@ use Carbon\Carbon;
 class AuthController extends Controller
 {
     public function signup(Request $request)
-{
+    {
     // Validation logic here
     $validator = Validator::make($request->all(), [
         'name' => 'required|string|max:255',
@@ -38,6 +38,31 @@ class AuthController extends Controller
     $token = $user->createToken('MyApp')->accessToken;
 
     return response()->json(['token' => $token], 200);
+    }
+
+    public function login(Request $request)
+{
+    // Validation logic 
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email',
+        'password' => 'required|string|min:8',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['error' => $validator->errors()], 422);
+    }
+
+    $credentials = request(['email', 'password']);
+
+    if (!Auth::attempt($credentials)) {
+        return response()->json(['error' => 'Unauthorized user'], 401);
+    }
+
+    $user = $request->user();
+    $token = $user->createToken('MyApp')->accessToken;
+
+    return response()->json(['token' => $token], 200);
 }
+
 
 }
