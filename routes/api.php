@@ -17,8 +17,11 @@ use App\Http\Controllers\API\AuthController;
 */
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+// Route::put('/update-user', [AuthController::class, 'updateProfile']);
+
+
 Route::middleware('auth:api')->group(function () {
-    Route::post('/update-user', [AuthController::class, 'updateProfile']);
+    Route::put('/profile/update', [AuthController::class, 'updateProfile']);
     Route::get('/get-user', [AuthController::class, 'getProfile']);
 });
 

@@ -75,7 +75,7 @@ class AuthController extends Controller
     // Validation logic here
     $validator = Validator::make($request->all(), [
         'name' => 'string|max:255',
-        'email' => 'email|unique:users,email,' . auth()->user()->email,
+        'email' => 'email|unique:users,email,' . auth()->user()->id,
         'password' => 'string|min:8',
         'date_of_birth' => 'date_format:d-m-Y',
     ]);
@@ -86,11 +86,17 @@ class AuthController extends Controller
 
     // Update profile logic
     $user = auth()->user();
+    if (!$user) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
 
     if ($request->filled('email')) {
-        $existingUser = User::where('email', $request->email)->first();
+        // Check if the new email already exists for another user
+        $existingUser = User::where('email', $request->email)
+            ->where('id', '!=', $user->id)
+            ->first();
 
-        if ($existingUser && $existingUser->email !== $user->email) {
+        if ($existingUser) {
             return response()->json(['error' => 'The email has already been taken.'], 422);
         }
 
@@ -112,9 +118,5 @@ class AuthController extends Controller
     // Return the updated user profile
     return response()->json(['message' => 'Profile updated successfully', 'user' => $user], 200);
 }
-
-
-
-
 
 }
